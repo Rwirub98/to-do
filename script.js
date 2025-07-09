@@ -14,7 +14,7 @@ addTaskBtn.addEventListener("click",()=>{
     addTodo(taskInput.value)
 })
 
-addTaskBtn.addEventListener("keydown",(e)=>{
+taskInput.addEventListener("keydown",(e)=>{
   if(e.key=="Enter"){
     addTodo(taskInput.value)
   }
@@ -33,6 +33,8 @@ function addTodo(text){
   todos.push(todo)
   saveTodos()
   //rendertodos
+
+  taskInput.value="";
 }
 
 function saveTodos(){
@@ -80,7 +82,7 @@ function renderTodos(){
 
       const checkbox=document.createElement("input")
       checkbox.type = "checkbox"
-      checkbox.classList.add("todo-checkbox")
+      checkbox.classList.add("to-do-checkbox")
       checkbox.checked = todo.completed
       checkbox.addEventListener("change",()=> toggleTodo(todo.id))
 
@@ -92,7 +94,7 @@ function renderTodos(){
        
       const todoText = document.createElement("span")
       todoText.classList.add("to-do-item-text")
-      todoText.textContent = todo.text
+      todoText.textContent = todo.text; 
 
       const deleteBtn = document.createElement("button");
       deleteBtn.classList.add("delete-btn");
@@ -111,6 +113,62 @@ function renderTodos(){
 }
 
 
-function clearCompleted(){}
-function toggleTodo(){}
-function deleteTodo(){}
+function clearCompleted(){
+  todos = todos.filter(todo=> !todo.completed);
+  saveTodos();
+  renderTodos();
+}
+
+function toggleTodo(id){
+ todos = todos.map((todo)=>{
+  if(todo.id === id) {
+    return{...todo, completed: !todo.completed};
+  }
+
+  return todo;
+ });
+
+ saveTodos()
+ renderTodos()
+}
+
+function deleteTodo(id){
+  todos = todos.filter((todo) => todo.id !== id);
+  saveTodos();
+  renderTodos();
+}
+
+
+function loadTodos(){
+  const storedTodos = localStorage.getItem("todos");
+  if(storedTodos) todos = JSON.parse(storedTodos);
+  renderTodos();
+}
+filters.forEach(filter =>{
+  filter.addEventListener("click",()=>{
+    setActiveFilter(filter.getAttribute("data-filter"))
+  })
+})
+function setActiveFilter(filter){
+  currentFilter = filter
+
+  filters.forEach(item =>{
+    if(item.getAttribute("data-filter")===filter){
+      item.classList.add("active")
+    }else{
+      item.classList.remove("active");
+    }
+  });
+  renderTodos();
+}
+ function setDate(){
+  const options = {weekday:"long", month:"short", day:"numeric"};
+  const today =  new Date();
+
+  dateElement.textContent = today.toLocaleDateString("en-us",options);
+ }
+window.addEventListener("DOMContentLoaded", ()=>{
+  setDate();
+  loadTodos();
+  updateItemsCount();
+})
